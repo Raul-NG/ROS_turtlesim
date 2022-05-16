@@ -1,6 +1,5 @@
 #! /usr/bin/env python3
 
-from matplotlib.pyplot import contour
 from Turtle import *
 
 if __name__ == '__main__':
