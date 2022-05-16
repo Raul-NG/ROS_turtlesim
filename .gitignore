@@ -1,0 +1,10 @@
+# Ignora la carpeta con scripts que no se usan.
+scripts
+
+# Archivos que no se requiere subir.
+CMakeLists.txt
+
+package.xml
+
+# Ignora la cache de python
+src/__pycache__
