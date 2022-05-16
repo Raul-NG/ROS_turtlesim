@@ -1,13 +1,15 @@
 #! /usr/bin/env python3
 
 from turtle import back
+
+from cv2 import threshold
 from Turtle import *
 
 def square(turtle):
     wp = [[1,10],[10,10],[10,1],[1,1]]
     for point in wp:
         turtle.orientate(point[0],point[1])
-        turtle.go_to_goal(point[0],point[1])
+        turtle.go_to_goal(point[0],point[1],threshold=0.01)
 
 def circle(turtle):
     turtle.orientate(1,5.5)

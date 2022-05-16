@@ -13,6 +13,6 @@
 		args="call /spawn 1 1 0 'turtle1'" 
 		launch-prefix="bash -c 'sleep $(arg node_spawn_delay); $0 $@' "/>	 
 	
-	<node pkg="bitbybit_turtles" type="rosmove_ej0.py" name="el_movimiento" />
+	<node pkg="bitbybit_turtles" type="ej0_rosmove.py" name="el_movimiento" />
 
 </launch>
