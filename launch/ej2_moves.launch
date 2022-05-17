@@ -10,11 +10,11 @@
 	<arg name="node_spawn_delay" default="1s" />
 	
 	<node pkg="rosservice" type="rosservice" name="load_turtle1" 
-		args="call /spawn 5.5 1 1.57 'turtle1'" 
+		args="call /spawn 5.5 2 1.57 'turtle1'" 
 		launch-prefix="bash -c 'sleep $(arg node_spawn_delay); $0 $@' " />	
 
 	<node pkg="rosservice" type="rosservice" name="load_turtle2" 
-		args="call /spawn 5.5 10 4.7124 'turtle2'"/>
+		args="call /spawn 5.5 9 4.7124 'turtle2'"/>
 	
 	<node pkg="bitbybit_turtles" type="ej2_rosmove.py" name="main" />
 	<node pkg="bitbybit_turtles" type="ej2_dummy.py" name="dummy" />
