@@ -8,7 +8,7 @@ if __name__ == '__main__':
         rospy.init_node('Dummy', anonymous = True)
         turtle2 = Turtle_controlled('turtle2')
         time.sleep(9)
-        turtle2.go_to_goal(5.5,1,velocity = 5)
+        turtle2.go_to_goal(5.5,2,velocity = 5)
         while True:
             turtle2.orientate(5.5,9)
             turtle2.go_to_goal(5.5,9,velocity = random.randint(5,70)/10)

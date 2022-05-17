@@ -11,5 +11,5 @@ if __name__ == '__main__':
     while True:
         turtle_main.go_to_goal_dodge(5.5,9,other_turtles)
         turtle_main.orientate(5.5,2)
-        turtle_main.go_to_goal_dodge(5.5,2,other_turtles)
+        turtle_main.go_to_goal_dodge(5.5,2,other_turtles) 
         turtle_main.orientate(5.5,9)

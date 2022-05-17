@@ -21,7 +21,7 @@ if __name__ == '__main__':
         
         while turtle_main.y < other_turtles[0].y and abs(other_turtles[0].x - turtle_main.x) < 1:
             turtle_main.set_velocity()
-    for i in range(3):
+    for i in range(5):
         turtle_main.set_velocity()
 
     # threshold = (turtle1.vel*turtle2.vel) + 0.5 #if  (turtle1.vel*turtle2.vel) == 0 else 1
