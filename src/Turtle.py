@@ -72,25 +72,74 @@ class Turtle_controlled(Turtle):
             self.set_velocity(angular_velocity=angular_speed)
         self.set_velocity()
 
-    def go_to_goal(self, x_goal, y_goal, velocity = None, go_back = False, threshold = 0.1, stop = True):
+    def go_to_goal(self, x_goal, y_goal, other_turtles = None, velocity = None, go_back = False, threshold = 0.1, stop = True, look_ahead_distance = 2):
         kap = 8.0
         kad = 2.5
         klp = 2.0
         kld = 0.4
         dt = 0.001
         look_ahead_distance = 2.5
+        num_distances = 3
         
         desired_angle_goal = math.atan2(y_goal-self.y, x_goal-self.x)
         dtheta = desired_angle_goal-(self.theta - math.pi*go_back)
-        dtheta=math.atan2(math.sin(dtheta),math.cos(dtheta)) #Devuelve el menor angulo para girar
+        dtheta = math.atan2(math.sin(dtheta),math.cos(dtheta)) #Devuelve el menor angulo para girar
         distance = self.get_distance(x_goal, y_goal)
-
+        # count = 0
+        # distances = [0 for _ in range(num_distances)]
         while(distance > threshold):
+        #     count = (count + 1)%(num_distances*10)
+        #     if count % 10 == 0:
+        #         distances[int(count/10)] = distance
+        #         for i in range(num_distances):
+        #             if i != int(count/10) and distances[i] != 0 and distances[i] == distances[int(count/10)]:
+        #                 self.orientate(x_goal, y_goal)
+                        # pass
             time.sleep(dt)
             dtheta_ant = dtheta
             distance_ant = distance
             linear_speed = (1 - 2*go_back)*(klp * (distance) + kld * (distance - distance_ant)/dt if velocity is None else velocity)
             linear_speed = linear_speed if linear_speed < self.max_speed else self.max_speed
+
+            if other_turtles is not None:
+                for turtle in other_turtles:
+                    pos_turtle = self.tp_global_to_turtle(turtle.x,turtle.y)
+                    if self.get_distance(turtle=turtle) < max(look_ahead_distance, turtle.linear_velocity) and pos_turtle[0] > 0 and abs(pos_turtle[1]) < 1:
+                        theta_ant = self.theta
+                        m = (y_goal - self.y)/(x_goal - self.x)
+                        b = self.y - m*self.x
+                        point = self.tp_turtle_to_global(pos_turtle[0] - max(1,turtle.linear_velocity), pos_turtle[1] + (1 if pos_turtle[1] < 0 else -1))
+                        self.go_to_goal(point[0], point[1], velocity=self.max_speed)
+                        dtheta = theta_ant-(self.theta - math.pi*go_back)
+                        dtheta=math.atan2(math.sin(dtheta),math.cos(dtheta))
+                        while abs(dtheta) > 0.001 and pos_turtle[0] >= -max(1.5, turtle.linear_velocity): # and turtle.tp_global_to_turtle(x_goal,y_goal)[0] >= -1.5:
+                            time.sleep(dt)
+                            pos_turtle = self.tp_global_to_turtle(turtle.x,turtle.y)
+                            dtheta_ant = dtheta
+                            dtheta = theta_ant - (self.theta - math.pi*go_back)
+                            dtheta=math.atan2(math.sin(dtheta),math.cos(dtheta))
+                            angular_speed = kap * (dtheta) + kad * (dtheta - dtheta_ant)/dt
+                            self.set_velocity(self.max_speed, angular_speed)
+
+                        while pos_turtle[0] >= -1.5 and turtle.tp_global_to_turtle(x_goal,y_goal)[0] >= -1.5:
+                            self.set_velocity(linear_speed)
+                            time.sleep(dt)
+                            pos_turtle = self.tp_global_to_turtle(turtle.x,turtle.y)
+                        goal = self.tp_global_to_turtle(x_goal, y_goal)
+                        pos = [self.x, self.y] if goal[0] <= 0 else self.tp_turtle_to_global(1,0)
+                        x_line = (pos[1] + pos[0]/m - b)/(m + 1/m)
+                        y_line = m*x_line+b
+                        # self.go_to_goal((3*x_line + self.x)/4,(3*y_line+self.y)/4,threshold=0.1,velocity=self.max_speed,stop=False)
+
+                        # self.go_to_goal_dodge(x_line,y_line,other_turtles,velocity=linear_speed,threshold=0.1,look_ahead_distance=0.5)
+                        if turtle.get_distance(x_goal, y_goal) < 1.5 and self.get_distance(x_goal, y_goal) > 1.5:
+                            self.orientate(x_goal,y_goal)
+                        elif self.tp_global_to_turtle(x_goal,y_goal)[0] > self.tp_global_to_turtle(x_line,y_line)[0] or turtle.get_distance(x_goal, y_goal) < 1.5:
+                            self.go_to_goal(x_line,y_line,threshold=0.1,velocity=self.max_speed,stop=False)
+                        
+                        while turtle.get_distance(x_goal, y_goal) < 1.5 and self.get_distance(x_goal, y_goal) > 1.5:
+                            self.orientate(x_goal,y_goal)
+                            time.sleep(dt)
 
             desired_angle_goal = math.atan2(y_goal-self.y, x_goal-self.x)
             dtheta = desired_angle_goal - (self.theta - math.pi*go_back)
@@ -112,78 +161,5 @@ class Turtle_controlled(Turtle):
                 angular_speed = linear_speed * 2 * goal_transformed[1] / distance**2
             except ZeroDivisionError:
                 angular_speed = 0
-            self.set_velocity(linear_speed, angular_speed)
-        self.set_velocity()
-
-    def go_to_direction(self, desired_angle, linear_speed, go_back = False):
-        kap = 8.0
-        kad = 2.5
-        dt = 0.001
-        dtheta = desired_angle-(self.theta - math.pi*go_back)
-        dtheta=math.atan2(math.sin(dtheta),math.cos(dtheta))
-
-        linear_speed = (1-2*go_back)*(linear_speed if linear_speed < self.max_speed else self.max_speed)
-
-        while abs(dtheta) > 0.001:
-            time.sleep(dt)
-            dtheta_ant = dtheta
-            dtheta = desired_angle - (self.theta - math.pi*go_back)
-            dtheta=math.atan2(math.sin(dtheta),math.cos(dtheta))
-            angular_speed = kap * (dtheta) + kad * (dtheta - dtheta_ant)/dt
-            self.set_velocity(linear_speed, angular_speed)
-        # self.set_velocity()
-    # def dodge(self, x_goal, y_goal, linear_speed)
-    def go_to_goal_dodge(self, x_goal, y_goal, other_turtles, velocity = None, go_back = False, threshold_goal = 0.1, look_ahead_distance = 2):
-        kap = 8.0
-        kad = 2.5
-        klp = 2.0
-        kld = 0.3
-        dt = 0.001
-        
-        desired_angle_goal = math.atan2(y_goal-self.y, x_goal-self.x)
-        dtheta = desired_angle_goal-(self.theta - math.pi*go_back)
-        dtheta = math.atan2(math.sin(dtheta),math.cos(dtheta))
-        distance = self.get_distance(x_goal, y_goal)
-
-        while(distance > threshold_goal):
-            time.sleep(dt)
-            dtheta_ant = dtheta
-            distance_ant = distance
-            linear_speed = (1 - 2*go_back)*(klp * (distance) + kld * (distance - distance_ant)/dt if velocity is None else velocity)
-            linear_speed = linear_speed if linear_speed < self.max_speed else self.max_speed
-
-            for turtle in other_turtles:
-                pos_turtle = self.tp_global_to_turtle(turtle.x,turtle.y)
-                if self.get_distance(turtle=turtle) < max(look_ahead_distance, turtle.linear_velocity) and pos_turtle[0] > 0:#linear_speed + 1.5 + turtle.linear_velocity:
-                    theta_ant = self.theta
-                    m = (y_goal - self.y)/(x_goal - self.x)
-                    b = self.y - m*self.x
-                    point = self.tp_turtle_to_global(pos_turtle[0] - (1 if turtle.linear_velocity < 1 else turtle.linear_velocity), pos_turtle[1] - 1)
-                    self.go_to_goal(point[0], point[1], velocity=self.max_speed)
-                    self.go_to_direction(theta_ant,max(linear_speed, turtle.linear_velocity + 1, 2))
-                    while pos_turtle[0] >= -1.5 and turtle.tp_global_to_turtle(x_goal,y_goal)[0] >= -1.5:
-                        self.set_velocity(linear_speed)
-                        time.sleep(dt)
-                        pos_turtle = self.tp_global_to_turtle(turtle.x,turtle.y)
-                    goal = self.tp_global_to_turtle(x_goal, y_goal)
-                    pos = [self.x, self.y] if goal[0] <= 0 else self.tp_turtle_to_global(1,0)
-                    x_line = (pos[1] + pos[0]/m - b)/(m + 1/m)
-                    y_line = m*x_line+b
-                    # self.go_to_goal((3*x_line + self.x)/4,(3*y_line+self.y)/4,threshold=0.1,velocity=self.max_speed,stop=False)
-
-                    # self.go_to_goal_dodge(x_line,y_line,other_turtles,velocity=linear_speed,threshold=0.1,look_ahead_distance=0.5)
-                    if self.tp_global_to_turtle(x_goal,y_goal)[0] > self.tp_global_to_turtle(x_line,y_line)[0]:
-                        self.go_to_goal(x_line,y_line,threshold=0.1,velocity=self.max_speed,stop=False)
-                        # self.orientate(x_goal,y_goal)
-                        # angle = math.atan2(y_goal-self.y, x_goal-self.x)
-                        # self.go_to_direction(angle, linear_speed)
-
-            desired_angle_goal = math.atan2(y_goal-self.y, x_goal-self.x)
-            dtheta = desired_angle_goal - (self.theta - math.pi*go_back)
-            dtheta=math.atan2(math.sin(dtheta),math.cos(dtheta))
-            distance = self.get_distance(x_goal, y_goal)
-
-            angular_speed = kap * (dtheta) + kad * (dtheta - dtheta_ant)/dt
-            
             self.set_velocity(linear_speed, angular_speed)
         self.set_velocity()
