@@ -3,7 +3,7 @@
 from Turtle import *
 
 if __name__ == '__main__':
-    rospy.init_node('Ejercicio1', anonymous = True)
+    rospy.init_node('Ejercicio2', anonymous = True)
     turtle_main = Turtle_controlled('turtle1')
     other_turtles = [Turtle('turtle'+str(i)) for i in range(2,3)]
     time.sleep(3)
