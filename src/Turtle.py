@@ -173,10 +173,10 @@ class Turtle_controlled(Turtle):
             distance = self.get_distance(x_goal, y_goal)
             
             angular_speed = kap * (dtheta) + kad * (dtheta - dtheta_ant)/dt
-            # if abs(angular_speed) > 13:
-            #     self.orientate(x_goal, y_goal)
-
-            self.set_velocity(linear_speed, angular_speed)
+            if abs(angular_speed) > 13:
+                self.orientate(x_goal, y_goal)
+            else:
+                self.set_velocity(linear_speed, angular_speed)
         if stop:
             self.set_velocity()
 
